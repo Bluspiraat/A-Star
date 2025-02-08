@@ -13,7 +13,7 @@ class Grid:
         self.nodes = self.create_nodes()
         self.__determine_neighbours()
         self.__determine_z(z_scalar)
-        self.screen = pygame.display.set_mode((self.width * self.cell_size, self.height * self.cell_size))
+        self.screen = pygame.display.set_mode((self.height * self.cell_size, self.width * self.cell_size))
 
     def __determine_neighbours(self):
         grid = {}
@@ -31,7 +31,7 @@ class Grid:
             grid[key].neighbours = neighbours
 
     def __determine_z(self, scalar):
-        noise = OpenSimplex(43)
+        noise = OpenSimplex(0)
         z_values = []
         grid = {}
         for node in self.nodes:
@@ -56,12 +56,16 @@ class Grid:
             y = node.y * self.cell_size + self.border
             width = self.cell_size - 2 * self.border
             height = self.cell_size - 2 * self.border
-            pygame.draw.rect(self.screen, self.__generate_color(node.z), (x, y, width, height))
+            if node.status == 2:
+                pygame.draw.rect(self.screen, (255, 255, 255), (x, y, width, height))
+            else:
+                pygame.draw.rect(self.screen, self.__generate_color(node.z), (x, y, width, height))
         pygame.display.flip()
 
-    def __generate_color(self, z_value):
+    @staticmethod
+    def __generate_color(z_value):
         color = pygame.Color(0)
-        color.hsva = (abs((z_value-1)*255), 100, 100, 100)
+        color.hsva = (abs((z_value - 1) * 255), 100, 100, 100)
         return color
 
     def block_cells_random(self, chance):
