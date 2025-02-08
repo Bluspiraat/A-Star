@@ -4,8 +4,8 @@ import pygame
 
 
 class AStar:
-    def __init__(self, x, y, cell_size, border, block_chance, path_weight, heuristic_weight):
-        self.grid = Grid(x, y, cell_size, border)
+    def __init__(self, x, y, z_scalar, cell_size, border, block_chance, path_weight, heuristic_weight):
+        self.grid = Grid(x, y, z_scalar, cell_size, border)
         self.grid.block_cells_random(block_chance)
         self.path_weight = path_weight
         self.heuristic_weight = heuristic_weight

@@ -1,3 +1,5 @@
+import colorsys
+
 import opensimplex
 
 from nodes import Node
@@ -7,14 +9,14 @@ from opensimplex import OpenSimplex
 
 
 class Grid:
-    def __init__(self, width, height, cell_size, border):
+    def __init__(self, width, height, z_scalar, cell_size, border):
         self.width = width
         self.height = height
         self.cell_size = cell_size
         self.border = border
         self.nodes = self.create_nodes()
         self.__determine_neighbours()
-        self.__determine_z()
+        self.__determine_z(z_scalar)
         self.screen = pygame.display.set_mode((self.width * self.cell_size, self.height * self.cell_size))
 
     def __determine_neighbours(self):
@@ -32,14 +34,14 @@ class Grid:
                     neighbours.append(neighbour)
             grid[key].neighbours = neighbours
 
-    def __determine_z(self):
+    def __determine_z(self, scalar):
         noise = OpenSimplex(43)
         grid = {}
         for node in self.nodes:
             grid[node.x, node.y] = node
         for key in grid.keys():
             x, y = key
-            grid[key].z = (noise.noise2(x, y) + 1) * 128  # Map from [-1, 1] to [0, 255]
+            grid[key].z = (noise.noise2(x * scalar, y * scalar) + 1) * 128  # Map from [-1, 1] to [0, 255]
 
     def create_nodes(self):
         nodes = []
@@ -55,18 +57,9 @@ class Grid:
             y = node.y * self.cell_size + self.border
             width = self.cell_size - 2 * self.border
             height = self.cell_size - 2 * self.border
-            if not node.accessible:
-                pygame.draw.rect(self.screen, (100, 100, 100), (x, y, width, height))
-            elif node.status == 0:
-                pygame.draw.rect(self.screen, (255, 255, 255), (x, y, width, height))
-            elif node.status == 1:
-                pygame.draw.rect(self.screen, (255, 153, 0), (x, y, width, height))
-            elif node.status == 2:
-                pygame.draw.rect(self.screen, (0, 0, 255), (x, y, width, height))
-            elif node.status == 3:
-                pygame.draw.rect(self.screen, (0, 255, 0), (x, y, width, height))
-            elif node.status == 4:
-                pygame.draw.rect(self.screen, (255, 0, 0), (x, y, width, height))
+            color = pygame.Color(0)
+            color.hsva = (node.z/2, 100, 100, 100)
+            pygame.draw.rect(self.screen, color, (x, y, width, height))
         pygame.display.flip()
 
     def block_cells_random(self, chance):
