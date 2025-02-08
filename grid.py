@@ -1,7 +1,3 @@
-import colorsys
-
-import opensimplex
-
 from nodes import Node
 import pygame
 import random
@@ -36,12 +32,15 @@ class Grid:
 
     def __determine_z(self, scalar):
         noise = OpenSimplex(43)
+        z_values = []
         grid = {}
         for node in self.nodes:
             grid[node.x, node.y] = node
         for key in grid.keys():
             x, y = key
-            grid[key].z = (noise.noise2(x * scalar, y * scalar) + 1) * 128  # Map from [-1, 1] to [0, 255]
+            grid[key].z = (noise.noise2(x * scalar, y * scalar) + 1) * 0.5  # Map from [-1, 1] to [0, 1]
+            z_values.append(grid[key].z)
+        print(f'The max z_value is: {max(z_values)} and the minimum value is {min(z_values)}')
 
     def create_nodes(self):
         nodes = []
@@ -57,10 +56,13 @@ class Grid:
             y = node.y * self.cell_size + self.border
             width = self.cell_size - 2 * self.border
             height = self.cell_size - 2 * self.border
-            color = pygame.Color(0)
-            color.hsva = (node.z/2, 100, 100, 100)
-            pygame.draw.rect(self.screen, color, (x, y, width, height))
+            pygame.draw.rect(self.screen, self.__generate_color(node.z), (x, y, width, height))
         pygame.display.flip()
+
+    def __generate_color(self, z_value):
+        color = pygame.Color(0)
+        color.hsva = (abs((z_value-1)*255), 100, 100, 100)
+        return color
 
     def block_cells_random(self, chance):
         for node in self.nodes:
