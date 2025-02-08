@@ -1,6 +1,9 @@
+import opensimplex
+
 from nodes import Node
 import pygame
 import random
+from opensimplex import OpenSimplex
 
 
 class Grid:
@@ -11,6 +14,7 @@ class Grid:
         self.border = border
         self.nodes = self.create_nodes()
         self.__determine_neighbours()
+        self.__determine_z()
         self.screen = pygame.display.set_mode((self.width * self.cell_size, self.height * self.cell_size))
 
     def __determine_neighbours(self):
@@ -28,11 +32,20 @@ class Grid:
                     neighbours.append(neighbour)
             grid[key].neighbours = neighbours
 
+    def __determine_z(self):
+        noise = OpenSimplex(43)
+        grid = {}
+        for node in self.nodes:
+            grid[node.x, node.y] = node
+        for key in grid.keys():
+            x, y = key
+            grid[key].z = (noise.noise2(x, y) + 1) * 128  # Map from [-1, 1] to [0, 255]
+
     def create_nodes(self):
         nodes = []
         for i in range(self.height):
             for j in range(self.width):
-                nodes.append(Node(i, j, True))
+                nodes.append(Node(i, j, 0, True))
         return nodes
 
     def display(self):
